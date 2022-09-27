@@ -1,5 +1,5 @@
 <template>
-  <div class="page">{{selectColumn}}
+  <div class="page">
     <div class="filter-wrap">
       <div class="filter-block">
         <div>
@@ -13,29 +13,28 @@
             <option value=distance>Расстояние</option>
           </select>
         </div>
-
         <div>
           <span>Выбор условия</span>
-          <select class="select">
+          <select
+              v-model="selectMethod"
+              class="select">
             <option value="" disabled selected>Выбор условия</option>
             <option value=equal>Равно</option>
             <option value=contain>Содержит</option>
-            <option value=more>Больше</option>
-            <option value=less>Меньше</option>
+            <option value=more :disabled="selectColumn === 'title'">Больше</option>
+            <option value=less :disabled="selectColumn === 'title'">Меньше</option>
           </select>
         </div>
-
         <div>
           <span>Значение для фильтрации</span>
           <input
+              v-model="filterField"
               class="select"
               type="text"
           />
         </div>
       </div>
     </div>
-
-
     <table class="table table-striped">
       <thead>
       <tr>
@@ -95,12 +94,21 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
-  name: 'HelloWorld',
+  name: 'TableWrap',
   props: {
     msg: String
   },
   methods: {
+    async getItems(){
+      await axios.get('http://localhost:8081/api/table').then(response => {
+        this.items = response.data
+      }).catch(error => {
+        console.log(error)
+      })
+    },
     setPage(pageNumber){
       this.page = pageNumber
     },
@@ -122,19 +130,33 @@ export default {
   },
   watch: {
     countItems() {
-      console.log("3333333")
       this.page = 1
     }
   },
   computed: {
+    filteredItems() {
+      const field = this.selectColumn
+      switch (this.selectMethod) {
+        case 'less':
+          return this.items.filter(item => item[field] < Number(this.filterField));
+        case 'more':
+          return this.items.filter(item => item[field] > Number(this.filterField));
+        case 'contain':
+          return this.items.filter(item => String (item[field]).toUpperCase().includes(this.filterField?.toUpperCase()));
+        case 'equal':
+          return this.items.filter(item => String (item[field]).toUpperCase() === this.filterField?.toUpperCase());
+        default:
+          return this.items
+      }
+    },
     paginationLength() {
       if (this.countItems === '') {
         return 1
       }
-      return Math.ceil(this.items.length / this.countItems)
+      return Math.ceil(this.filteredItems.length / this.countItems)
     },
     paginatedItems() {
-      return this.items.slice(this.startIndex, this.endIndex);
+      return this.filteredItems.slice(this.startIndex, this.endIndex);
     },
     startIndex() {
       return (this.page - 1) * this.countItems;
@@ -143,13 +165,21 @@ export default {
       return this.page * this.countItems;
     },
   },
+  mounted() {
+    this.getItems()
+  },
   data() {
     return {
+      filterField: '',
+      selectMethod: null,
       selectColumn: null,
       page: 1,
       countItems: 6,
       sortOrderMax: true,
       currentSortField: null,
+
+      /////////////////////////*значения для тестирования*/////////////////////////
+
       items: [
         {
           "id": 1,
@@ -170,70 +200,70 @@ export default {
           "title": "title3",
           "date_item": "2001-12-31",
           "quantity": 120,
-          "distance": 1
+          "distance": 10
         },
         {
           "id": 4,
           "title": "title4",
           "date_item": "2002-12-31",
           "quantity": 43,
-          "distance": 6
+          "distance": 60
         },
         {
           "id": 5,
           "title": "title5",
           "date_item": "2003-12-31",
           "quantity": 53,
-          "distance": 234
+          "distance": 2340
         },
         {
           "id": 6,
           "title": "title6",
           "date_item": "2004-12-31",
           "quantity": 65,
-          "distance": 262
+          "distance": 2620
         },
         {
           "id": 7,
           "title": "title7",
           "date_item": "2005-12-31",
           "quantity": 822,
-          "distance": 742
+          "distance": 7420
         },
         {
           "id": 8,
           "title": "title8",
           "date_item": "2006-12-31",
           "quantity": 6,
-          "distance": 2
+          "distance": 20
         },
         {
           "id": 9,
           "title": "title9",
           "date_item": "2007-12-31",
           "quantity": 56,
-          "distance": 12
+          "distance": 120
         },
         {
           "id": 10,
           "title": "title10",
           "date_item": "2008-12-31",
           "quantity": 886,
-          "distance": 896
+          "distance": 8960
         },
         {
           "id": 11,
           "title": "title11",
           "date_item": "2009-12-31",
           "quantity": 836,
-          "distance": 96
+          "distance": 960
         },
         {
           "id": 12,
           "title": "title12",
           "date_item": "2010-12-31",
           "quantity": 90,
-          "distance": 21
+          "distance": 210
         }
       ]
     }

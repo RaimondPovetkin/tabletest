@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <TableWrap msg="Welcome to Your Vue.js App"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import TableWrap from "@/components/TableWrap";
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    TableWrap
   }
 }
 </script>
